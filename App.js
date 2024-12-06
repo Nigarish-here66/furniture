@@ -1,36 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from "react-native";
+import {View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, Alert} from "react-native";
+import { ref, set, push } from "firebase/database";
+import database from "./firebaseConfig"; 
+import items from "./items"; 
 
 const CheckoutScreen = () => {
   const [quantities, setQuantities] = useState({
-    florence: 1,
-    hewitt: 2,
-    harper: 2,
+    florence: 0,
+    hewitt: 0,
+    harper: 0,
   });
-
-  const items = [
-    {
-      name: "Florence Chair",
-      price: 980,
-      monthly: 45,
-      key: "florence",
-      image: require("./assets/florence.png"),
-    },
-    {
-      name: "Hewitt Chair",
-      price: 897,
-      monthly: 39,
-      key: "hewitt",
-      image: require("./assets/hewitt.png"),
-    },
-    {
-      name: "Harper Swivel Chair",
-      price: 800,
-      monthly: 28,
-      key: "harper",
-      image: require("./assets/harper.png"),
-    },
-  ];
 
   const handleQuantityChange = (key, delta) => {
     setQuantities((prev) => ({
@@ -47,6 +26,37 @@ const CheckoutScreen = () => {
   const rentalPeriod = 2;
   const deliveryFee = 199;
   const subtotal = monthlyTotal * rentalPeriod + deliveryFee;
+
+  const handleCheckout = async () => {
+    const checkoutData = items
+      .filter((item) => quantities[item.key] > 0)
+      .map((item) => ({
+        name: item.name,
+        price: item.price,
+        monthly: item.monthly,
+        quantity: quantities[item.key],
+        totalMonthlyCost: item.monthly * quantities[item.key],
+      }));
+
+    const orderData = {
+      items: checkoutData,
+      monthlyTotal,
+      rentalPeriod,
+      deliveryFee,
+      subtotal,
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      const ordersRef = ref(database, "orders");
+      await push(ordersRef, orderData);
+
+      Alert.alert("Success", "Your order has been placed!");
+    } catch (error) {
+      console.error("Error saving order: ", error);
+      Alert.alert("Error", "Failed to place your order. Please try again.");
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -94,7 +104,7 @@ const CheckoutScreen = () => {
           <Text>Subtotal:</Text>
           <Text>${subtotal}</Text>
         </View>
-        <TouchableOpacity style={styles.rentButton}>
+        <TouchableOpacity style={styles.rentButton} onPress={handleCheckout}>
           <Text style={styles.rentButtonText}>Rent</Text>
         </TouchableOpacity>
       </View>
@@ -104,14 +114,15 @@ const CheckoutScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20, // Reduced padding to better fit small screens
+    padding: 20, 
     backgroundColor: "#f7f7f7",
   },
   header: {
     fontSize: 24,
+    textAlign: "center",
     fontWeight: "bold",
-    marginBottom: 16,
-    marginTop: 40,
+    marginBottom: 30,
+    marginTop: 70,
   },
   itemRow: {
     flexDirection: "row",
@@ -119,17 +130,18 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#fff",
     borderRadius: 8,
-    padding: 16, // Balanced padding inside boxes
+    padding: 20,
+    paddingHorizontal: 12, 
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    width: "100%", // Full width for consistent alignment
+    width: "100%", 
   },
   itemImage: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 90,
     borderRadius: 8,
     marginRight: 16,
   },
@@ -147,6 +159,7 @@ const styles = StyleSheet.create({
   },
   itemMonthly: {
     fontSize: 14,
+    marginTop: 10,
     color: "#007BFF",
   },
   counter: {
@@ -154,8 +167,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   counterButton: {
-    width: 32,
-    height: 32,
+    width: 25,
+    height: 25,
     borderRadius: 16,
     backgroundColor: "#007BFF",
     alignItems: "center",
@@ -181,7 +194,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
-    width: "100%", // Full width for summary section
+    width: "100%", 
   },
   summaryHeader: {
     fontSize: 18,
