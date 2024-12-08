@@ -1,7 +1,7 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import {View,Text,TouchableOpacity,Image} from "react-native";
 
-const ItemRow = ({ item, quantities, updateQuantity }) => {
+const ItemRow = ({item,quantities,updateQuantity })=>{
   return (
     <View style={styles.itemRow}>
 
@@ -35,7 +35,7 @@ const ItemRow = ({ item, quantities, updateQuantity }) => {
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   itemRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -96,6 +96,6 @@ const styles = {
     fontSize: 16,
     fontWeight: "bold",
   },
-};
+});
 
 export default ItemRow;

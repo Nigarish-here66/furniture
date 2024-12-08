@@ -1,35 +1,34 @@
-import React, { useState } from "react";
-import { ScrollView, Text, Alert, StyleSheet } from "react-native";
-import { ref, push } from "firebase/database";
+import React, {useState} from "react";
+import {ScrollView,Text,Alert,StyleSheet} from "react-native";
+import {ref,push} from "firebase/database";
 import database from "./firebaseConfig"; 
 import ItemRow from "./components/ItemRow"; 
 import Summary from "./components/Summary"; 
 import items from "./components/items";
 
-const CheckoutScreen = () => {
-  const [quantities, setQuantities] = useState({ florence: 0, hewitt: 0, harper: 0 });
+const CheckoutScreen =()=>{
+  const [quantities,setQuantities] = useState({florence:0, hewitt:0, harper:0});
 
-  const updateQuantity = (itemKey, change) => {
+  const updateQuantity = (itemKey, change) =>{
     let currentQuantity = quantities[itemKey];
-    let newQuantity = currentQuantity + change;
+    let newQuantity = currentQuantity+change;
   
-    if (newQuantity < 0) {
-      newQuantity = 0;
+    if (newQuantity<0){
+      newQuantity=0;
     }
   
     setQuantities({
       ...quantities,
-      [itemKey]: newQuantity,
+      [itemKey]:newQuantity,
     });
   };
   
-  const calculateMonthlyTotal = () => {
-    let total = 0;
-    for (const item of items) {
+  const calculateMonthlyTotal =()=>{
+    let total=0;
+    for (const item of items){
       const quantity = quantities[item.key] || 0;
       total += quantity * item.monthly;
-    }
-    return total;
+    } return total;
   };
 
   const monthlyTotal = calculateMonthlyTotal();
@@ -37,34 +36,34 @@ const CheckoutScreen = () => {
   const deliveryFee = 199;
   const subtotal = monthlyTotal * rentalPeriod + deliveryFee;
 
-  const handleCheckout = async () => {
+  const handleCheckout = async ()=>{
     const checkoutItems = [];
-    for (const item of items) {
+    for (const item of items){
       const quantity = quantities[item.key] || 0;
-      if (quantity > 0) {
+      if (quantity>0){
         checkoutItems.push({
-          name: item.name,
-          price: item.price,
-          monthly: item.monthly,
+          name:item.name,
+          price:item.price,
+          monthly:item.monthly,
           quantity,
-          totalMonthlyCost: item.monthly * quantity,
+          totalMonthlyCost:item.monthly * quantity,
         });
       }
     }
 
-    const orderDetails = {
-      items: checkoutItems,
+    const orderDetails ={
+      items:checkoutItems,
       monthlyTotal,
       rentalPeriod,
       deliveryFee,
       subtotal,
     };
 
-    try {
+    try{
       const ordersRef = ref(database, "orders");
       await push(ordersRef, orderDetails);
       Alert.alert("Success", "Your order has been placed!");
-    } catch (error) {
+    }catch (error){
       console.error("Error saving order: ", error);
       Alert.alert("Error", "Failed to place your order. Please try again.");
     }
@@ -73,7 +72,7 @@ const CheckoutScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.header}>Checkout</Text>
-      {items.map((item) => (
+      {items.map((item) =>(
         <ItemRow 
           key={item.key} 
           item={item} 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import {View,Text,TouchableOpacity} from "react-native";
 
 const Summary = ({ monthlyTotal, deliveryFee, rentalPeriod, subtotal, handleCheckout }) => {
   return (
@@ -30,7 +30,7 @@ const Summary = ({ monthlyTotal, deliveryFee, rentalPeriod, subtotal, handleChec
       <TouchableOpacity style={styles.rentButton} onPress={handleCheckout}>
         <Text style={styles.rentButtonText}>Rent</Text>
       </TouchableOpacity>
-      
+
     </View>
   );
 };
